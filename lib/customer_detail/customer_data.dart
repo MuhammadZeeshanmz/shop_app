@@ -32,12 +32,10 @@ class CustomerManager extends ChangeNotifier {
   void addSale(String name, String number, int amount) {
     final index = _customers.indexWhere((c) => c.number == number);
     if (index != -1) {
-      _customers[index].purchased += amount; // Customer buys more → shop earns
-      _customers[index].paid += amount; // Sale is paid immediately
+      _customers[index].paid += amount; // Correct: only update `paid`
     } else {
-      _customers.add(
-        Customer(name: name, number: number, purchased: amount, paid: amount),
-      );
+      // Sale without purchase, still add paid amount
+      _customers.add(Customer(name: name, number: number, paid: amount));
     }
     notifyListeners();
   }

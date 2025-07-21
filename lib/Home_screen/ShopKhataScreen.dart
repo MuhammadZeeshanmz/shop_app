@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/customer_detail/customer_data.dart'; // Make sure this path is correct
+import 'package:shop_app/customer_detail/customer_data.dart';
 
 class ShopKhataScreen extends StatelessWidget {
   const ShopKhataScreen({
@@ -11,7 +11,7 @@ class ShopKhataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shop Khata Summary'),
+        title: const Text('Shop Khata Summary'),
         backgroundColor: const Color.fromARGB(255, 196, 152, 136),
       ),
       body: AnimatedBuilder(
@@ -58,10 +58,10 @@ class InfoTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
       child: ListTile(
-        title: Text(label, style: TextStyle(fontSize: 16)),
+        title: Text(label, style: const TextStyle(fontSize: 16)),
         trailing: Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
             color: Colors.indigo,
