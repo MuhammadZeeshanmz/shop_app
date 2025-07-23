@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/customer_detail/customer_data.dart';
+import 'package:intl/intl.dart';
 
 class CustomerDetailScreen extends StatelessWidget {
   final Customer customer;
@@ -8,16 +9,24 @@ class CustomerDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactions = [
-      if (customer.purchased > 0)
-        {
-          'type': 'Purchase',
-          'amount': customer.purchased,
-          'date': '2025-07-10',
-        },
-      if (customer.paid > 0)
-        {'type': 'Sell', 'amount': customer.paid, 'date': '2025-07-11'},
-    ];
+    final balance = customer.paid - customer.purchased;
+
+    final status =
+        balance > 0
+            ? 'Advance'
+            : balance < 0
+            ? 'Due'
+            : 'Cleared';
+
+    final balanceColor =
+        balance > 0
+            ? Colors.green
+            : balance < 0
+            ? Colors.red
+            : Colors.grey;
+
+    final transactions = [...customer.transactions]; // clone the list
+    transactions.sort((a, b) => b.date.compareTo(a.date)); // newest first
 
     return Scaffold(
       appBar: AppBar(
@@ -29,38 +38,59 @@ class CustomerDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Phone: ${customer.number}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-
-            if (customer.purchased > 0)
-              Text('Total Purchased: Rs. ${customer.purchased}'),
-
-            if (customer.paid > 0) Text('Total Sell: Rs. ${customer.paid}'),
-
-            Text('Balance: Rs. ${customer.purchased - customer.paid}'),
-
-            Divider(height: 30),
-
             Text(
-              'Transaction History:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              '📞 Phone: ${customer.number}',
+              style: const TextStyle(fontSize: 16),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: transactions.length,
-                itemBuilder: (context, index) {
-                  final txn = transactions[index];
-                  return ListTile(
-                    leading: Icon(
-                      txn['type'] == 'Purchase' ? Icons.add : Icons.remove,
-                      color:
-                          txn['type'] == 'Purchase' ? Colors.red : Colors.green,
-                    ),
-                    title: Text('${txn['type']} - Rs. ${txn['amount']}'),
-                    subtitle: Text('Date: ${txn['date']}'),
-                  );
-                },
+            const SizedBox(height: 10),
+            Text(
+              '🛒 Total Purchased: Rs. ${customer.purchased.toStringAsFixed(0)}',
+            ),
+            Text('💵 Total Sell: Rs. ${customer.paid.toStringAsFixed(0)}'),
+            Text(
+              '📊 $status: Rs. ${balance.toStringAsFixed(0)}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: balanceColor,
               ),
+            ),
+            const Divider(height: 30),
+            const Text(
+              '🧾 Transaction History:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child:
+                  transactions.isEmpty
+                      ? const Center(child: Text('No transactions yet.'))
+                      : ListView.builder(
+                        itemCount: transactions.length,
+                        itemBuilder: (context, index) {
+                          final txn = transactions[index];
+                          final isPurchase = txn.type == 'Purchase';
+                          final formattedDate = DateFormat(
+                            'yyyy-MM-dd',
+                          ).format(txn.date);
+
+                          return Card(
+                            elevation: 1,
+                            child: ListTile(
+                              leading: Icon(
+                                isPurchase
+                                    ? Icons.add_circle_outline
+                                    : Icons.remove_circle_outline,
+                                color: isPurchase ? Colors.red : Colors.green,
+                              ),
+                              title: Text(
+                                '${isPurchase ? '🛒 Purchased' : '💵 Sell'} - Rs. ${txn.amount}',
+                              ),
+                              subtitle: Text('Date: $formattedDate'),
+                            ),
+                          );
+                        },
+                      ),
             ),
           ],
         ),

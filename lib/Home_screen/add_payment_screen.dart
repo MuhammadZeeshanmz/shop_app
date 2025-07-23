@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/customer_detail/customer_data.dart';
+import 'package:shop_app/customer_detail/customer_service.dart'; // 🔹 NEW
 import 'package:url_launcher/url_launcher.dart';
 
 class AddSellScreen extends StatelessWidget {
@@ -7,6 +8,8 @@ class AddSellScreen extends StatelessWidget {
   final nameController = TextEditingController();
   final numberController = TextEditingController();
   final amountController = TextEditingController();
+
+  final _customerService = CustomerService(); // 🔹 NEW
 
   AddSellScreen({super.key});
 
@@ -86,8 +89,17 @@ class AddSellScreen extends StatelessWidget {
                       final number = numberController.text.trim();
                       final amount = int.parse(amountController.text.trim());
 
+                      // 🟡 Add sale in memory
                       customerManager.addSale(name, number, amount);
 
+                      // 🔵 Sync updated customer to Firestore
+                      final updatedCustomer = customerManager.customers
+                          .firstWhere((c) => c.number == number);
+                      await _customerService.addOrUpdateCustomer(
+                        updatedCustomer,
+                      );
+
+                      // ✅ WhatsApp
                       final fullPhoneNumber = "92${number.substring(1)}";
                       final message = '''
 🛍️ *Abu Bakar General Store - Battal Bazar*
@@ -101,7 +113,6 @@ Thank you for shopping with us!
 We appreciate your business and look forward to serving you again!
 
 📍 Battal Bazar
-
 ''';
 
                       try {

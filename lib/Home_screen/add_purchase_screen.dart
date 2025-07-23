@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/customer_detail/customer_data.dart';
+import 'package:shop_app/customer_detail/customer_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AddPurchaseScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   final nameController = TextEditingController();
   final numberController = TextEditingController();
   final amountController = TextEditingController();
+  final _customerService = CustomerService(); // ✅ NEW
 
   Future<void> sendWhatsAppMessage(String phoneNumber, String message) async {
     final url =
@@ -103,7 +105,13 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 
                       customerManager.addPurchase(name, number, amount);
 
-                      // Format number: 03001234567 -> 923001234567
+                      final updatedCustomer = customerManager.customers
+                          .firstWhere((c) => c.number == number);
+
+                      await _customerService.addOrUpdateCustomer(
+                        updatedCustomer,
+                      ); // ✅ Firestore Sync
+
                       final fullPhoneNumber = "92${number.substring(1)}";
                       final message = '''
 💰 *Abu Bakar General Store - Battal Bazar*
@@ -117,11 +125,7 @@ Thank you for your payment of *Rs. $amount*.
 We appreciate your business and look forward to serving you again!
 
 📍 Battal Bazar
-
 ''';
-
-                      debugPrint("✅ Sending WhatsApp to: $fullPhoneNumber");
-                      debugPrint("💬 Message: $message");
 
                       try {
                         await sendWhatsAppMessage(fullPhoneNumber, message);

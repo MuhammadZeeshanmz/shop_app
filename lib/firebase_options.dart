@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'shopapp-83067.firebasestorage.app',
     measurementId: 'G-NYF47BSEK7',
   );
+
 }

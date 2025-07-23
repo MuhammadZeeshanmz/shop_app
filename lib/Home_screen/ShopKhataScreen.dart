@@ -11,7 +11,7 @@ class ShopKhataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop Khata Summary'),
+        title: const Text(' Shop Khata Summary'),
         backgroundColor: const Color.fromARGB(255, 196, 152, 136),
       ),
       body: AnimatedBuilder(
@@ -21,22 +21,22 @@ class ShopKhataScreen extends StatelessWidget {
 
           int totalPurchased = customers.fold(0, (sum, c) => sum + c.purchased);
           int totalPaid = customers.fold(0, (sum, c) => sum + c.paid);
-          int totalBalance = totalPurchased - totalPaid;
+          int totalBalance = totalPaid - totalPurchased;
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
                 InfoTile(
-                  label: 'Total Customers',
+                  label: '👥 Total Customers',
                   value: customers.length.toString(),
                 ),
                 InfoTile(
-                  label: 'Total Purchased',
+                  label: '🛒 Total Purchased',
                   value: 'Rs. $totalPurchased',
                 ),
-                InfoTile(label: 'Total Sell', value: 'Rs. $totalPaid'),
-                InfoTile(label: 'Total Balance', value: 'Rs. $totalBalance'),
+                InfoTile(label: '💵 Total Sell', value: 'Rs. $totalPaid'),
+                InfoTile(label: '📌 Total Balance', value: 'Rs. $totalBalance'),
               ],
             ),
           );
@@ -56,14 +56,26 @@ class InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 2,
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        title: Text(label, style: const TextStyle(fontSize: 16)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        title: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         trailing: Text(
           value,
           style: const TextStyle(
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            fontSize: 16,
             color: Colors.indigo,
           ),
         ),
