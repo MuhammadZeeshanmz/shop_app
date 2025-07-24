@@ -40,6 +40,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }
 
       setState(() => isLoading = true);
+      print("Starting signup process...");
 
       try {
         final UserCredential userCredential = await auth
@@ -48,18 +49,26 @@ class _SignupScreenState extends State<SignupScreen> {
               password: passwordController.text.trim(),
             );
 
+        print("User created: ${userCredential.user?.uid}");
+
         await firestore.collection('users').doc(userCredential.user!.uid).set({
           'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'createdAt': Timestamp.now(),
         });
 
+        print("User saved in Firestore. Navigating to HomeScreen...");
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen()),
         );
       } on FirebaseAuthException catch (e) {
+        print("FirebaseAuthException: ${e.message}");
         _showSnackBar(e.message ?? "Signup failed");
+      } catch (e, stackTrace) {
+        print("Exception caught: $e");
+        print("Stack trace: $stackTrace");
+        _showSnackBar("Something went wrong");
       } finally {
         setState(() => isLoading = false);
       }

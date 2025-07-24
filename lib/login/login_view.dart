@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shop_app/Home_screen/home_screen.dart';
+import 'package:shop_app/login/forgot_view.dart';
 import 'package:shop_app/signup/signup_view.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -117,6 +118,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ForgotPasswordScreen(),
+                          ),
+                        );
+                      }, // TODO: Forgot Password
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 196, 152, 136),
+                        ),
+                      ),
+                    ),
+                  ),
 
                   // Login Button
                   isLoading
