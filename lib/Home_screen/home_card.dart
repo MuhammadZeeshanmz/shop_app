@@ -8,7 +8,7 @@ class HomeCard extends StatelessWidget {
   final Color textColor;
   final Color iconColor;
 
-  const HomeCard({
+  const HomeCard({super.key, 
     required this.title,
     required this.icon,
     required this.route,

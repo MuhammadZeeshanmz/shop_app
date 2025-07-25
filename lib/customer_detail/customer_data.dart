@@ -18,9 +18,9 @@ class TransactionEntry {
 
   factory TransactionEntry.fromMap(Map<String, dynamic> map) {
     return TransactionEntry(
-      type: map['type'],
-      amount: map['amount'],
-      date: DateTime.parse(map['date']),
+      type: map['type'] ?? '',
+      amount: map['amount'] ?? 0,
+      date: DateTime.tryParse(map['date'] ?? '') ?? DateTime.now(),
     );
   }
 }
@@ -60,13 +60,9 @@ class Customer {
       purchased: map['purchased'] ?? 0,
       paid: map['paid'] ?? 0,
       transactions:
-          map['transactions'] != null
-              ? List<TransactionEntry>.from(
-                (map['transactions'] as List).map(
-                  (e) => TransactionEntry.fromMap(e),
-                ),
-              )
-              : [],
+          (map['transactions'] as List<dynamic>? ?? []).map((e) {
+            return TransactionEntry.fromMap(Map<String, dynamic>.from(e));
+          }).toList(),
     );
   }
 }
@@ -80,12 +76,23 @@ class CustomerManager extends ChangeNotifier {
   List<Customer> get customers => _customers;
 
   Future<void> loadCustomersFromFirestore() async {
-    final snapshot = await _collection.get();
-    _customers.clear();
-    for (var doc in snapshot.docs) {
-      _customers.add(Customer.fromMap(doc.data() as Map<String, dynamic>));
+    try {
+      print("🔄 Loading customers from Firestore...");
+      final snapshot = await _collection.get();
+      _customers.clear();
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final customer = Customer.fromMap(data);
+        _customers.add(customer);
+        print("✅ Loaded customer: ${customer.name} (${customer.number})");
+      }
+
+      notifyListeners();
+      print("📢 All customers loaded and listeners notified");
+    } catch (e) {
+      print("❌ Error loading customers: $e");
     }
-    notifyListeners();
   }
 
   Future<void> addPurchase(String name, String number, int amount) async {
@@ -109,6 +116,7 @@ class CustomerManager extends ChangeNotifier {
         ),
       );
     }
+
     await _syncToFirestore(number);
     notifyListeners();
   }
@@ -129,6 +137,7 @@ class CustomerManager extends ChangeNotifier {
         Customer(name: name, number: number, paid: amount, transactions: [txn]),
       );
     }
+
     await _syncToFirestore(number);
     notifyListeners();
   }
@@ -136,6 +145,7 @@ class CustomerManager extends ChangeNotifier {
   Future<void> _syncToFirestore(String number) async {
     final customer = _customers.firstWhere((c) => c.number == number);
     await _collection.doc(number).set(customer.toMap());
+    print("📤 Synced customer ${customer.name} to Firestore");
   }
 }
 

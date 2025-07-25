@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shop_app/customer_detail/customer_data.dart';
 import 'package:shop_app/login/login_view.dart';
+import 'package:shop_app/Home_screen/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,17 +37,30 @@ class _SplashScreenState extends State<SplashScreen>
       end: 0.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    // Delay the animation slightly to ensure the widget is mounted
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initApp());
+  }
 
-      Future.delayed(const Duration(seconds: 3), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-      });
-    });
+  Future<void> _initApp() async {
+    _controller.forward();
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    try {
+      await customerManager
+          .loadCustomersFromFirestore(); // ✅ Load Firestore data
+    } catch (e) {
+      debugPrint('🔥 Error loading customer data: $e');
+      // You may show a dialog/snackbar here
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => user != null ? HomeScreen() : const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -56,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Optional: splash background
+      backgroundColor: Colors.white,
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,

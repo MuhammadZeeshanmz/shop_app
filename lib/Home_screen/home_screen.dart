@@ -35,18 +35,18 @@ class HomeScreen extends StatelessWidget {
             content: Text('Do you want to logout or delete your account?'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
+                onPressed: () => Navigator.of(ctx).pop(false), // Cancel
                 child: Text('Cancel'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
+                onPressed: () => Navigator.of(ctx).pop(true), // Logout
                 child: Text('Logout'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(null),
+                onPressed: () => Navigator.of(ctx).pop(null), // Delete
                 child: Text(
                   'Delete Account',
-                  style: TextStyle(color: Color(0xFFF44336)), // Error Red
+                  style: TextStyle(color: Color(0xFFF44336)),
                 ),
               ),
             ],
@@ -56,9 +56,16 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (shouldLogout == true) {
+      // Logout
       await FirebaseAuth.instance.signOut();
       print("✅ User signed out");
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
     } else if (shouldLogout == null && user != null) {
+      // Delete account
       try {
         final uid = user.uid;
         await FirebaseFirestore.instance.collection('users').doc(uid).delete();
@@ -66,6 +73,11 @@ class HomeScreen extends StatelessWidget {
 
         await user.delete();
         print("🗑️ User account deleted");
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => LoginScreen()),
+        );
       } catch (e) {
         print("❌ Failed to delete account: $e");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -77,10 +89,7 @@ class HomeScreen extends StatelessWidget {
       }
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
+    // Do nothing if user chose Cancel
   }
 
   @override

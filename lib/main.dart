@@ -6,7 +6,7 @@ import 'package:shop_app/splash_screen/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(KhataApp());
+  runApp(const KhataApp());
 }
 
 class KhataApp extends StatelessWidget {
@@ -20,7 +20,7 @@ class KhataApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: SplashScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
