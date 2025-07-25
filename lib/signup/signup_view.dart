@@ -78,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade50,
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -92,7 +92,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.deepPurple.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.6),
                       blurRadius: 20,
                       offset: Offset(0, 10),
                     ),
@@ -105,14 +105,18 @@ class _SignupScreenState extends State<SignupScreen> {
                       "Create Account",
                       style: TextStyle(
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 196, 152, 136),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF4CAF50),
                       ),
                     ),
                     SizedBox(height: 8),
                     Text(
                       "Join us to get started",
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
                     SizedBox(height: 24),
 
@@ -170,17 +174,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     // Sign Up Button
                     isLoading
-                        ? CircularProgressIndicator(
-                          color: Color.fromARGB(255, 196, 152, 136),
-                        )
+                        ? CircularProgressIndicator(color: Color(0xFF4CAF50))
                         : ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              196,
-                              152,
-                              136,
-                            ),
+                            backgroundColor: Color(0xFF4CAF50),
                             padding: EdgeInsets.symmetric(
                               horizontal: 40,
                               vertical: 12,
@@ -192,7 +189,11 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: handleSignUp,
                           child: Text(
                             "Sign Up",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
 
@@ -206,10 +207,23 @@ class _SignupScreenState extends State<SignupScreen> {
                           MaterialPageRoute(builder: (_) => LoginScreen()),
                         );
                       },
-                      child: Text(
-                        "Already have an account? Login",
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 196, 152, 136),
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Already have an account? ",
+                          style: TextStyle(
+                            color: Color(0xFF4CAF50), // Green
+                            fontFamily: 'Poppins',
+                          ),
+                          children: [
+                            TextSpan(
+                              text: 'Login',
+                              style: TextStyle(
+                                color: Colors.grey, // Black color for "Sign up"
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

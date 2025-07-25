@@ -39,8 +39,20 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forgot Password'),
-        backgroundColor: const Color(0xFF1A9A1E),
+        title: const Text(
+          'Forgot Password',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Color(0xFF4CAF50),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(24),
@@ -49,7 +61,12 @@ class ForgotPasswordScreen extends StatelessWidget {
           children: [
             Text(
               'Enter your email to reset your password',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
             ),
             SizedBox(height: 20),
             TextField(
@@ -58,7 +75,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Email',
                 filled: true,
-                fillColor: const Color(0xFFDFF5DF),
+                fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -69,10 +86,17 @@ class ForgotPasswordScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () => _sendResetLink(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A9A1E),
+                backgroundColor: Color(0xFF4CAF50),
                 minimumSize: Size(double.infinity, 50),
               ),
-              child: const Text('Send Reset Link'),
+              child: const Text(
+                'Send Reset Link',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),

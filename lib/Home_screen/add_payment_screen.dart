@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/customer_detail/customer_data.dart';
-import 'package:shop_app/customer_detail/customer_service.dart'; // 🔹 NEW
+import 'package:shop_app/customer_detail/customer_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AddSellScreen extends StatelessWidget {
+class AddSellScreen extends StatefulWidget {
+  const AddSellScreen({super.key});
+
+  @override
+  State<AddSellScreen> createState() => _AddSellScreenState();
+}
+
+class _AddSellScreenState extends State<AddSellScreen> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
   final amountController = TextEditingController();
 
-  final _customerService = CustomerService(); // 🔹 NEW
+  final _customerService = CustomerService();
 
-  AddSellScreen({super.key});
+  bool _hovering = false;
+  bool _pressed = false;
 
   Future<void> sendWhatsAppMessage(String phoneNumber, String message) async {
     final url =
@@ -27,16 +35,37 @@ class AddSellScreen extends StatelessWidget {
   }
 
   @override
+  void dispose() {
+    nameController.dispose();
+    numberController.dispose();
+    amountController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Sell'),
-        backgroundColor: const Color.fromARGB(255, 196, 152, 136),
+        title: const Text(
+          'Add Sell',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
               buildTextField(
@@ -80,26 +109,30 @@ class AddSellScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
+
+              // Custom Hover Save Button
+              MouseRegion(
+                onEnter: (_) => setState(() => _hovering = true),
+                onExit: (_) => setState(() => _hovering = false),
+                child: GestureDetector(
+                  onTapDown: (_) => setState(() => _pressed = true),
+                  onTapUp: (_) => setState(() => _pressed = false),
+                  onTapCancel: () => setState(() => _pressed = false),
+                  onTap: () async {
                     if (_formKey.currentState!.validate()) {
                       final name = nameController.text.trim();
                       final number = numberController.text.trim();
                       final amount = int.parse(amountController.text.trim());
 
-                      // 🟡 Add sale in memory
                       customerManager.addSale(name, number, amount);
 
-                      // 🔵 Sync updated customer to Firestore
                       final updatedCustomer = customerManager.customers
                           .firstWhere((c) => c.number == number);
+
                       await _customerService.addOrUpdateCustomer(
                         updatedCustomer,
                       );
 
-                      // ✅ WhatsApp
                       final fullPhoneNumber = "92${number.substring(1)}";
                       final message = '''
 🛍️ *Abu Bakar General Store - Battal Bazar*
@@ -122,6 +155,7 @@ We appreciate your business and look forward to serving you again!
                             content: Text('Sale Added & WhatsApp Sent'),
                           ),
                         );
+                        Navigator.pop(context);
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -129,20 +163,41 @@ We appreciate your business and look forward to serving you again!
                           ),
                         );
                       }
-
-                      Navigator.pop(context);
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    transform:
+                        _pressed
+                            ? (Matrix4.identity()..scale(0.97))
+                            : Matrix4.identity(),
+                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: _hovering ? Colors.indigo.shade700 : Colors.indigo,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow:
+                          _hovering
+                              ? [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                              : [],
                     ),
-                  ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(color: Colors.white),
+                    child: Center(
+                      child: Text(
+                        _hovering ? 'Save' : 'Save',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

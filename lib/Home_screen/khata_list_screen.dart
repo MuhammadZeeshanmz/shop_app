@@ -9,8 +9,20 @@ class KhataListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Khata List'),
-        backgroundColor: const Color.fromARGB(255, 196, 152, 136),
+        title: const Text(
+          'Khata List',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: AnimatedBuilder(
         animation: customerManager,

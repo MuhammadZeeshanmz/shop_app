@@ -30,8 +30,15 @@ class CustomerDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("${customer.name}'s Khata"),
-        backgroundColor: const Color.fromARGB(255, 196, 152, 136),
+        title: Text(
+          "${customer.name}'s Khata",
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

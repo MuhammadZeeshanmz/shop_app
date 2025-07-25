@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade50,
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color.fromARGB(255, 196, 152, 136),
+                    color: Colors.black.withOpacity(0.6),
                     blurRadius: 20,
                     offset: Offset(0, 10),
                   ),
@@ -75,14 +75,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Welcome Back",
                     style: TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 196, 152, 136),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF4CAF50),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     "Login to continue",
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -132,7 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 196, 152, 136),
+                          color: Color(0xFF4CAF50),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     ),
@@ -140,17 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Login Button
                   isLoading
-                      ? CircularProgressIndicator(
-                        color: const Color.fromARGB(255, 196, 152, 136),
-                      )
+                      ? CircularProgressIndicator(color: Color(0xFF4CAF50))
                       : ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            196,
-                            152,
-                            136,
-                          ),
+                          backgroundColor: Color(0xFF4CAF50),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 40,
                             vertical: 12,
@@ -162,7 +160,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: handleLogin,
                         child: const Text(
                           "Login",
-                          style: TextStyle(color: Colors.white),
+
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
 
@@ -175,10 +178,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(builder: (_) => SignupScreen()),
                       );
                     },
-                    child: const Text(
-                      "Don't have an account? Sign up",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 196, 152, 136),
+                    child: RichText(
+                      text: TextSpan(
+                        text: "Don't have an account? ",
+                        style: TextStyle(
+                          color: Color(0xFF4CAF50), // Green
+                          fontFamily: 'Poppins',
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Sign up',
+                            style: TextStyle(
+                              color: Colors.grey, // Black color for "Sign up"
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

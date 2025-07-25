@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Logout'),
+            title: Text('Logout', style: TextStyle(color: Color(0xFF212121))),
             content: Text('Do you want to logout or delete your account?'),
             actions: [
               TextButton(
@@ -43,11 +43,10 @@ class HomeScreen extends StatelessWidget {
                 child: Text('Logout'),
               ),
               TextButton(
-                onPressed:
-                    () => Navigator.of(ctx).pop(null), // Special case: delete
+                onPressed: () => Navigator.of(ctx).pop(null),
                 child: Text(
                   'Delete Account',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: Color(0xFFF44336)), // Error Red
                 ),
               ),
             ],
@@ -62,12 +61,9 @@ class HomeScreen extends StatelessWidget {
     } else if (shouldLogout == null && user != null) {
       try {
         final uid = user.uid;
-
-        // Delete Firestore document
         await FirebaseFirestore.instance.collection('users').doc(uid).delete();
         print("🗑️ User document deleted");
 
-        // Delete Firebase Auth account
         await user.delete();
         print("🗑️ User account deleted");
       } catch (e) {
@@ -75,12 +71,12 @@ class HomeScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Failed to delete account. Try logging in again."),
+            backgroundColor: Color(0xFFF44336),
           ),
         );
       }
     }
 
-    // Navigate to login in all cases
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => LoginScreen()),
@@ -90,13 +86,22 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5F5), // Light grey background
       appBar: AppBar(
-        title: Text('Shop Khata'),
-        backgroundColor: const Color.fromARGB(255, 196, 152, 136),
+        title: Text(
+          'A G S',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white, // Dark text
+          ),
+        ),
+        backgroundColor: Color(0xFF4CAF50), // Primary Green
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
             tooltip: 'Logout',
+            color: Colors.white,
             onPressed: () => logoutUser(context),
           ),
         ],
@@ -112,21 +117,33 @@ class HomeScreen extends StatelessWidget {
               title: 'Add Purchase',
               icon: Icons.add_shopping_cart,
               route: AddPurchaseScreen(),
+              cardColor: Colors.white,
+              textColor: Color(0xFF212121),
+              iconColor: Color(0xFF4CAF50),
             ),
             HomeCard(
               title: 'Add Sell',
               icon: Icons.payment,
               route: AddSellScreen(),
+              cardColor: Colors.white,
+              textColor: Color(0xFF212121),
+              iconColor: Color(0xFF4CAF50),
             ),
             HomeCard(
               title: 'View Khata',
               icon: Icons.receipt_long,
               route: KhataListScreen(),
+              cardColor: Colors.white,
+              textColor: Color(0xFF212121),
+              iconColor: Color(0xFF4CAF50),
             ),
             HomeCard(
               title: 'Shop Summary',
               icon: Icons.bar_chart,
               route: ShopKhataScreen(customers: customersList),
+              cardColor: Colors.white,
+              textColor: Color(0xFF212121),
+              iconColor: Color(0xFF4CAF50),
             ),
           ],
         ),

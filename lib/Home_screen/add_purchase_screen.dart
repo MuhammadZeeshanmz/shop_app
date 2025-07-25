@@ -15,7 +15,10 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   final nameController = TextEditingController();
   final numberController = TextEditingController();
   final amountController = TextEditingController();
-  final _customerService = CustomerService(); // ✅ NEW
+  final _customerService = CustomerService();
+
+  bool _hovering = false;
+  bool _pressed = false;
 
   Future<void> sendWhatsAppMessage(String phoneNumber, String message) async {
     final url =
@@ -42,8 +45,20 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Purchase'),
-        backgroundColor: const Color.fromARGB(255, 196, 152, 136),
+        title: const Text(
+          'Add Purchase',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -94,10 +109,16 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
+
+              // Custom Save Button
+              MouseRegion(
+                onEnter: (_) => setState(() => _hovering = true),
+                onExit: (_) => setState(() => _hovering = false),
+                child: GestureDetector(
+                  onTapDown: (_) => setState(() => _pressed = true),
+                  onTapUp: (_) => setState(() => _pressed = false),
+                  onTapCancel: () => setState(() => _pressed = false),
+                  onTap: () async {
                     if (_formKey.currentState!.validate()) {
                       final name = nameController.text.trim();
                       final number = numberController.text.trim();
@@ -110,7 +131,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 
                       await _customerService.addOrUpdateCustomer(
                         updatedCustomer,
-                      ); // ✅ Firestore Sync
+                      );
 
                       final fullPhoneNumber = "92${number.substring(1)}";
                       final message = '''
@@ -129,7 +150,6 @@ We appreciate your business and look forward to serving you again!
 
                       try {
                         await sendWhatsAppMessage(fullPhoneNumber, message);
-
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Purchase Added & WhatsApp Sent'),
@@ -145,16 +165,39 @@ We appreciate your business and look forward to serving you again!
                       }
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    transform:
+                        _pressed
+                            ? (Matrix4.identity()..scale(0.97))
+                            : Matrix4.identity(),
+                    width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: _hovering ? Colors.indigo.shade700 : Colors.indigo,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow:
+                          _hovering
+                              ? [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ]
+                              : [],
                     ),
-                  ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    child: const Center(
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
