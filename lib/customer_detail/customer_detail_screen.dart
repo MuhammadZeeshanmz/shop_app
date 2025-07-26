@@ -1,5 +1,5 @@
+import 'package:ags/customer_detail/customer_data.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_app/customer_detail/customer_data.dart';
 import 'package:intl/intl.dart';
 
 class CustomerDetailScreen extends StatelessWidget {
@@ -31,7 +31,7 @@ class CustomerDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "${customer.name}'s Khata",
+          "${customer.name} Khata",
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w600,
@@ -39,6 +39,11 @@ class CustomerDetailScreen extends StatelessWidget {
           ),
         ),
         backgroundColor: const Color(0xFF4CAF50),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

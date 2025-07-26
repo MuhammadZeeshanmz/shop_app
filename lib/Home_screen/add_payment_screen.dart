@@ -1,6 +1,6 @@
+import 'package:ags/customer_detail/customer_data.dart';
+import 'package:ags/customer_detail/customer_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_app/customer_detail/customer_data.dart';
-import 'package:shop_app/customer_detail/customer_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AddSellScreen extends StatefulWidget {

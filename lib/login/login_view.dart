@@ -1,8 +1,8 @@
+import 'package:ags/Home_screen/home_screen.dart';
+import 'package:ags/login/forgot_view.dart';
+import 'package:ags/signup/signup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shop_app/Home_screen/home_screen.dart';
-import 'package:shop_app/login/forgot_view.dart';
-import 'package:shop_app/signup/signup_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

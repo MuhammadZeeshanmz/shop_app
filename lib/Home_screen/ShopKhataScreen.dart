@@ -1,5 +1,5 @@
+import 'package:ags/customer_detail/customer_data.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_app/customer_detail/customer_data.dart';
 
 class ShopKhataScreen extends StatelessWidget {
   const ShopKhataScreen({

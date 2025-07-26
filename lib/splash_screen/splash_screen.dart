@@ -1,9 +1,9 @@
+import 'package:ags/Home_screen/home_screen.dart';
+import 'package:ags/customer_detail/customer_data.dart';
+import 'package:ags/login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shop_app/customer_detail/customer_data.dart';
-import 'package:shop_app/login/login_view.dart';
-import 'package:shop_app/Home_screen/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

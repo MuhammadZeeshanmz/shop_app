@@ -1,12 +1,12 @@
+import 'package:ags/Home_screen/ShopKhataScreen.dart';
+import 'package:ags/Home_screen/add_payment_screen.dart';
+import 'package:ags/Home_screen/add_purchase_screen.dart';
+import 'package:ags/Home_screen/home_card.dart';
+import 'package:ags/Home_screen/khata_list_screen.dart';
+import 'package:ags/login/login_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shop_app/login/login_view.dart';
-import 'package:shop_app/Home_screen/ShopKhataScreen.dart';
-import 'package:shop_app/Home_screen/add_payment_screen.dart';
-import 'package:shop_app/Home_screen/add_purchase_screen.dart';
-import 'package:shop_app/Home_screen/home_card.dart';
-import 'package:shop_app/Home_screen/khata_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -35,15 +35,15 @@ class HomeScreen extends StatelessWidget {
             content: Text('Do you want to logout or delete your account?'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false), // Cancel
+                onPressed: () => Navigator.of(ctx).pop(false),
                 child: Text('Cancel'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true), // Logout
+                onPressed: () => Navigator.of(ctx).pop(true),
                 child: Text('Logout'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(null), // Delete
+                onPressed: () => Navigator.of(ctx).pop(null),
                 child: Text(
                   'Delete Account',
                   style: TextStyle(color: Color(0xFFF44336)),
@@ -56,30 +56,23 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (shouldLogout == true) {
-      // Logout
       await FirebaseAuth.instance.signOut();
-      print("✅ User signed out");
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
       );
     } else if (shouldLogout == null && user != null) {
-      // Delete account
       try {
-        final uid = user.uid;
-        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-        print("🗑️ User document deleted");
-
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .delete();
         await user.delete();
-        print("🗑️ User account deleted");
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => LoginScreen()),
         );
       } catch (e) {
-        print("❌ Failed to delete account: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Failed to delete account. Try logging in again."),
@@ -88,24 +81,24 @@ class HomeScreen extends StatelessWidget {
         );
       }
     }
-
-    // Do nothing if user chose Cancel
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5), // Light grey background
+      backgroundColor: Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text(
-          'A G S',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            color: Colors.white, // Dark text
-          ),
+        title: Row(
+          children: [
+            Image(
+              image: AssetImage('assets/cwhite.png'),
+              height: 40,
+              width: 40,
+            ),
+            SizedBox(width: 8),
+          ],
         ),
-        backgroundColor: Color(0xFF4CAF50), // Primary Green
+        backgroundColor: Color(0xFF4CAF50),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -117,10 +110,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+        child: Column(
           children: [
             HomeCard(
               title: 'Add Purchase',
@@ -129,7 +119,9 @@ class HomeScreen extends StatelessWidget {
               cardColor: Colors.white,
               textColor: Color(0xFF212121),
               iconColor: Color(0xFF4CAF50),
+              // animate: true,
             ),
+            SizedBox(height: 16),
             HomeCard(
               title: 'Add Sell',
               icon: Icons.payment,
@@ -138,6 +130,7 @@ class HomeScreen extends StatelessWidget {
               textColor: Color(0xFF212121),
               iconColor: Color(0xFF4CAF50),
             ),
+            SizedBox(height: 16),
             HomeCard(
               title: 'View Khata',
               icon: Icons.receipt_long,
@@ -146,6 +139,7 @@ class HomeScreen extends StatelessWidget {
               textColor: Color(0xFF212121),
               iconColor: Color(0xFF4CAF50),
             ),
+            SizedBox(height: 16),
             HomeCard(
               title: 'Shop Summary',
               icon: Icons.bar_chart,

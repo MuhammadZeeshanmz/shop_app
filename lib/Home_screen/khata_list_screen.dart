@@ -1,6 +1,6 @@
+import 'package:ags/customer_detail/customer_data.dart';
+import 'package:ags/customer_detail/customer_detail_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_app/customer_detail/customer_detail_screen.dart';
-import 'package:shop_app/customer_detail/customer_data.dart';
 
 class KhataListScreen extends StatelessWidget {
   const KhataListScreen({super.key});
