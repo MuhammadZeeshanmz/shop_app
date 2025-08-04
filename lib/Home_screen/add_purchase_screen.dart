@@ -77,12 +77,15 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
             children: [
               buildTextField(
                 controller: nameController,
-                label: 'Customer Name',
-                hint: 'Enter customer name',
-                icon: Icons.person,
+                label: 'Business/Entity Name',
+                hint: 'Enter the name of the company, wholesaler, or supplier',
+                icon: Icons.business,
                 textCapitalization: TextCapitalization.words,
                 validator:
-                    (value) => value!.isEmpty ? 'Enter customer name' : null,
+                    (value) =>
+                        value!.isEmpty
+                            ? 'Please enter a valid business or supplier name'
+                            : null,
               ),
               const SizedBox(height: 10),
               buildTextField(
