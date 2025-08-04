@@ -28,7 +28,7 @@ class TransactionEntry {
 class Customer {
   String name;
   String number;
-  int purchased;
+  int purchased; // Interpreted as "Total Sell"
   int paid;
   List<TransactionEntry> transactions;
 
@@ -125,7 +125,7 @@ class CustomerManager extends ChangeNotifier {
   }
 
   /// New: Purchase with Partial Payment
-  Future<void> addSaleWithPartialPayment(
+  Future<void> addPurchaseWithPartialPayment(
     String name,
     String number,
     int totalAmount,
@@ -133,13 +133,13 @@ class CustomerManager extends ChangeNotifier {
   ) async {
     final index = _customers.indexWhere((c) => c.number == number);
 
-    final saleTxn = TransactionEntry(
-      type: 'Purchase', // Treat as "Sold"
+    final purchaseTxn = TransactionEntry(
+      type: 'Purchase',
       amount: totalAmount,
       date: DateTime.now(),
     );
 
-    final paymentTxn = TransactionEntry(
+    final paidTxn = TransactionEntry(
       type: 'Payment',
       amount: paidAmount,
       date: DateTime.now(),
@@ -147,10 +147,9 @@ class CustomerManager extends ChangeNotifier {
 
     if (index != -1) {
       final customer = _customers[index];
-      customer.purchased += totalAmount; // This is the missing line you need!
+      customer.purchased += totalAmount;
       customer.paid += paidAmount;
-      customer.transactions.add(saleTxn);
-      customer.transactions.add(paymentTxn);
+      customer.transactions.addAll([purchaseTxn, paidTxn]);
     } else {
       _customers.add(
         Customer(
@@ -158,7 +157,7 @@ class CustomerManager extends ChangeNotifier {
           number: number,
           purchased: totalAmount,
           paid: paidAmount,
-          transactions: [saleTxn, paymentTxn],
+          transactions: [purchaseTxn, paidTxn],
         ),
       );
     }
@@ -167,7 +166,7 @@ class CustomerManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Old: Simple Sale
+  /// Old: Simple Sale (not used now)
   Future<void> addSale(String name, String number, int amount) async {
     final index = _customers.indexWhere((c) => c.number == number);
     final txn = TransactionEntry(
@@ -189,7 +188,7 @@ class CustomerManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// New: Sale with Partial Payment
+  /// ✅ New: Sale with Partial Payment (Fix: Add totalAmount to `purchased`)
   Future<void> addSaleWithPartialPayment(
     String name,
     String number,
@@ -212,6 +211,7 @@ class CustomerManager extends ChangeNotifier {
 
     if (index != -1) {
       final customer = _customers[index];
+      customer.purchased += totalAmount; // ✅ Add this to count as sell
       customer.paid += paidAmount;
       customer.transactions.addAll([sellTxn, paidTxn]);
     } else {
@@ -219,6 +219,7 @@ class CustomerManager extends ChangeNotifier {
         Customer(
           name: name,
           number: number,
+          purchased: totalAmount, // ✅ Track sale in "purchased"
           paid: paidAmount,
           transactions: [sellTxn, paidTxn],
         ),
@@ -229,7 +230,7 @@ class CustomerManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sync a single customer to Firestore
+  /// 🔁 Sync to Firestore
   Future<void> _syncToFirestore(String number) async {
     final customer = _customers.firstWhere((c) => c.number == number);
     await _collection.doc(number).set(customer.toMap());

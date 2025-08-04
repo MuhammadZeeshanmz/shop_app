@@ -9,7 +9,20 @@ class CustomerDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final remaining = customer.purchased - customer.paid;
+    // 🧮 Separate totals for Purchase and Sell
+    final totalPurchase = customer.transactions
+        .where((t) => t.type == 'Purchase')
+        .fold<int>(0, (sum, t) => sum + t.amount);
+
+    final totalSell = customer.transactions
+        .where((t) => t.type == 'Sell')
+        .fold<int>(0, (sum, t) => sum + t.amount);
+
+    final hasOnlyPurchase = totalPurchase > 0 && totalSell == 0;
+    final hasOnlySell = totalSell > 0 && totalPurchase == 0;
+
+    final totalPaid = customer.paid;
+    final remaining = (totalPurchase + totalSell) - totalPaid;
 
     final remainingColor =
         remaining > 0
@@ -48,8 +61,12 @@ class CustomerDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 10),
-            Text('💵 Total Sell: Rs. ${customer.purchased.toStringAsFixed(0)}'),
-            Text('💰 Total Paid: Rs. ${customer.paid.toStringAsFixed(0)}'),
+
+            if (hasOnlyPurchase) Text('🛒 Total Purchase: Rs. $totalPurchase'),
+
+            if (hasOnlySell) Text('💵 Total Sell: Rs. $totalSell'),
+
+            Text('💰 Total Paid: Rs. ${totalPaid.toStringAsFixed(0)}'),
             Text(
               '📊 Remaining Amount: Rs. ${remaining.abs().toStringAsFixed(0)}',
               style: TextStyle(
@@ -82,9 +99,9 @@ class CustomerDetailScreen extends StatelessWidget {
 
                           switch (txn.type) {
                             case 'Purchase':
-                              label = '💵 Sold';
-                              icon = Icons.sell;
-                              iconColor = Colors.red;
+                              label = '🛒 Purchased';
+                              icon = Icons.shopping_cart;
+                              iconColor = Colors.orange;
                               break;
                             case 'Payment':
                               label = '💰 Paid';
