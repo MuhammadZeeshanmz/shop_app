@@ -9,23 +9,16 @@ class CustomerDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final balance = customer.paid - customer.purchased;
+    final remaining = customer.purchased - customer.paid;
 
-    final status =
-        balance > 0
-            ? 'Advance'
-            : balance < 0
-            ? 'Due'
-            : 'Cleared';
-
-    final balanceColor =
-        balance > 0
-            ? Colors.green
-            : balance < 0
+    final remainingColor =
+        remaining > 0
             ? Colors.red
+            : remaining < 0
+            ? Colors.green
             : Colors.grey;
 
-    final transactions = [...customer.transactions]; // clone the list
+    final transactions = [...customer.transactions];
     transactions.sort((a, b) => b.date.compareTo(a.date)); // newest first
 
     return Scaffold(
@@ -55,16 +48,14 @@ class CustomerDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 10),
+            Text('💵 Total Sell: Rs. ${customer.purchased.toStringAsFixed(0)}'),
+            Text('💰 Total Paid: Rs. ${customer.paid.toStringAsFixed(0)}'),
             Text(
-              '🛒 Total Purchased: Rs. ${customer.purchased.toStringAsFixed(0)}',
-            ),
-            Text('💵 Total Sell: Rs. ${customer.paid.toStringAsFixed(0)}'),
-            Text(
-              '📊 $status: Rs. ${balance.toStringAsFixed(0)}',
+              '📊 Remaining Amount: Rs. ${remaining.abs().toStringAsFixed(0)}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: balanceColor,
+                color: remainingColor,
               ),
             ),
             const Divider(height: 30),
@@ -81,23 +72,41 @@ class CustomerDetailScreen extends StatelessWidget {
                         itemCount: transactions.length,
                         itemBuilder: (context, index) {
                           final txn = transactions[index];
-                          final isPurchase = txn.type == 'Purchase';
                           final formattedDate = DateFormat(
                             'yyyy-MM-dd',
                           ).format(txn.date);
 
+                          String label;
+                          IconData icon;
+                          Color iconColor;
+
+                          switch (txn.type) {
+                            case 'Purchase':
+                              label = '💵 Sold';
+                              icon = Icons.sell;
+                              iconColor = Colors.red;
+                              break;
+                            case 'Payment':
+                              label = '💰 Paid';
+                              icon = Icons.payments_outlined;
+                              iconColor = Colors.green;
+                              break;
+                            case 'Sell':
+                              label = '💵 Sold';
+                              icon = Icons.sell;
+                              iconColor = Colors.indigo;
+                              break;
+                            default:
+                              label = '🔁 ${txn.type}';
+                              icon = Icons.swap_horiz;
+                              iconColor = Colors.grey;
+                          }
+
                           return Card(
                             elevation: 1,
                             child: ListTile(
-                              leading: Icon(
-                                isPurchase
-                                    ? Icons.add_circle_outline
-                                    : Icons.remove_circle_outline,
-                                color: isPurchase ? Colors.red : Colors.green,
-                              ),
-                              title: Text(
-                                '${isPurchase ? '🛒 Purchased' : '💵 Sell'} - Rs. ${txn.amount}',
-                              ),
+                              leading: Icon(icon, color: iconColor),
+                              title: Text('$label - Rs. ${txn.amount}'),
                               subtitle: Text('Date: $formattedDate'),
                             ),
                           );

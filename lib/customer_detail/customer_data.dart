@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TransactionEntry {
-  final String type; // 'Purchase' or 'Sell'
+  final String type; // 'Purchase', 'Sell', or 'Payment'
   final int amount;
   final DateTime date;
 
@@ -60,9 +60,11 @@ class Customer {
       purchased: map['purchased'] ?? 0,
       paid: map['paid'] ?? 0,
       transactions:
-          (map['transactions'] as List<dynamic>? ?? []).map((e) {
-            return TransactionEntry.fromMap(Map<String, dynamic>.from(e));
-          }).toList(),
+          (map['transactions'] as List<dynamic>? ?? [])
+              .map(
+                (e) => TransactionEntry.fromMap(Map<String, dynamic>.from(e)),
+              )
+              .toList(),
     );
   }
 }
@@ -95,6 +97,7 @@ class CustomerManager extends ChangeNotifier {
     }
   }
 
+  /// Old: Simple Purchase
   Future<void> addPurchase(String name, String number, int amount) async {
     final index = _customers.indexWhere((c) => c.number == number);
     final txn = TransactionEntry(
@@ -121,6 +124,50 @@ class CustomerManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// New: Purchase with Partial Payment
+  Future<void> addSaleWithPartialPayment(
+    String name,
+    String number,
+    int totalAmount,
+    int paidAmount,
+  ) async {
+    final index = _customers.indexWhere((c) => c.number == number);
+
+    final saleTxn = TransactionEntry(
+      type: 'Purchase', // Treat as "Sold"
+      amount: totalAmount,
+      date: DateTime.now(),
+    );
+
+    final paymentTxn = TransactionEntry(
+      type: 'Payment',
+      amount: paidAmount,
+      date: DateTime.now(),
+    );
+
+    if (index != -1) {
+      final customer = _customers[index];
+      customer.purchased += totalAmount; // This is the missing line you need!
+      customer.paid += paidAmount;
+      customer.transactions.add(saleTxn);
+      customer.transactions.add(paymentTxn);
+    } else {
+      _customers.add(
+        Customer(
+          name: name,
+          number: number,
+          purchased: totalAmount,
+          paid: paidAmount,
+          transactions: [saleTxn, paymentTxn],
+        ),
+      );
+    }
+
+    await _syncToFirestore(number);
+    notifyListeners();
+  }
+
+  /// Old: Simple Sale
   Future<void> addSale(String name, String number, int amount) async {
     final index = _customers.indexWhere((c) => c.number == number);
     final txn = TransactionEntry(
@@ -142,6 +189,47 @@ class CustomerManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// New: Sale with Partial Payment
+  Future<void> addSaleWithPartialPayment(
+    String name,
+    String number,
+    int totalAmount,
+    int paidAmount,
+  ) async {
+    final index = _customers.indexWhere((c) => c.number == number);
+
+    final sellTxn = TransactionEntry(
+      type: 'Sell',
+      amount: totalAmount,
+      date: DateTime.now(),
+    );
+
+    final paidTxn = TransactionEntry(
+      type: 'Payment',
+      amount: paidAmount,
+      date: DateTime.now(),
+    );
+
+    if (index != -1) {
+      final customer = _customers[index];
+      customer.paid += paidAmount;
+      customer.transactions.addAll([sellTxn, paidTxn]);
+    } else {
+      _customers.add(
+        Customer(
+          name: name,
+          number: number,
+          paid: paidAmount,
+          transactions: [sellTxn, paidTxn],
+        ),
+      );
+    }
+
+    await _syncToFirestore(number);
+    notifyListeners();
+  }
+
+  /// Sync a single customer to Firestore
   Future<void> _syncToFirestore(String number) async {
     final customer = _customers.firstWhere((c) => c.number == number);
     await _collection.doc(number).set(customer.toMap());

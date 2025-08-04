@@ -14,7 +14,8 @@ class _AddSellScreenState extends State<AddSellScreen> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
-  final amountController = TextEditingController();
+  final totalAmountController = TextEditingController();
+  final paidAmountController = TextEditingController();
 
   final _customerService = CustomerService();
 
@@ -38,7 +39,8 @@ class _AddSellScreenState extends State<AddSellScreen> {
   void dispose() {
     nameController.dispose();
     numberController.dispose();
-    amountController.dispose();
+    totalAmountController.dispose();
+    paidAmountController.dispose();
     super.dispose();
   }
 
@@ -71,10 +73,11 @@ class _AddSellScreenState extends State<AddSellScreen> {
               buildTextField(
                 controller: nameController,
                 label: 'Customer Name',
-                hint: 'Enter your name',
+                hint: 'Enter customer name',
                 icon: Icons.person,
                 keyboardType: TextInputType.name,
-                validator: (value) => value!.isEmpty ? 'Enter name' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Enter customer name' : null,
               ),
               const SizedBox(height: 10),
               buildTextField(
@@ -95,22 +98,37 @@ class _AddSellScreenState extends State<AddSellScreen> {
               ),
               const SizedBox(height: 10),
               buildTextField(
-                controller: amountController,
-                label: 'Sell Amount',
-                hint: 'Enter sell amount',
+                controller: totalAmountController,
+                label: 'Total Sell Amount',
+                hint: 'Enter total sell amount',
                 icon: Icons.attach_money,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Enter amount';
+                  if (value == null || value.isEmpty)
+                    return 'Enter total amount';
                   if (int.tryParse(value) == null || int.parse(value) <= 0) {
                     return 'Invalid amount';
                   }
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
+              buildTextField(
+                controller: paidAmountController,
+                label: 'Paid Amount',
+                hint: 'Enter paid amount',
+                icon: Icons.money,
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty)
+                    return 'Enter paid amount';
+                  if (int.tryParse(value) == null || int.parse(value) < 0) {
+                    return 'Invalid amount';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 20),
-
-              // Custom Hover Save Button
               MouseRegion(
                 onEnter: (_) => setState(() => _hovering = true),
                 onExit: (_) => setState(() => _hovering = false),
@@ -122,29 +140,60 @@ class _AddSellScreenState extends State<AddSellScreen> {
                     if (_formKey.currentState!.validate()) {
                       final name = nameController.text.trim();
                       final number = numberController.text.trim();
-                      final amount = int.parse(amountController.text.trim());
+                      final totalAmount = int.parse(
+                        totalAmountController.text.trim(),
+                      );
+                      final paidAmount = int.parse(
+                        paidAmountController.text.trim(),
+                      );
 
-                      customerManager.addSale(name, number, amount);
+                      if (paidAmount > totalAmount) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Paid amount cannot be greater than total amount.",
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      // Use partial or full method based on comparison
+                      if (paidAmount < totalAmount) {
+                        await customerManager.addSaleWithPartialPayment(
+                          name,
+                          number,
+                          totalAmount,
+                          paidAmount,
+                        );
+                      } else {
+                        await customerManager.addSale(
+                          name,
+                          number,
+                          totalAmount,
+                        );
+                      }
 
                       final updatedCustomer = customerManager.customers
                           .firstWhere((c) => c.number == number);
-
                       await _customerService.addOrUpdateCustomer(
                         updatedCustomer,
                       );
 
                       final fullPhoneNumber = "92${number.substring(1)}";
+                      final remaining = totalAmount - paidAmount;
+
                       final message = '''
 🛍️ *Abu Bakar General Store - Battal Bazar*
 
 Dear $name,
 
-Thank you for shopping with us!
+🧾 Sale of *Rs. $totalAmount* recorded.
 
-🧾 We’ve recorded your purchase of *Rs. $amount*.
+✅ Paid: Rs. $paidAmount
+📊 Remaining: Rs. $remaining
 
-We appreciate your business and look forward to serving you again!
-
+Thank you for doing business with us!
 📍 Battal Bazar
 ''';
 
@@ -152,7 +201,7 @@ We appreciate your business and look forward to serving you again!
                         await sendWhatsAppMessage(fullPhoneNumber, message);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Sale Added & WhatsApp Sent'),
+                            content: Text('Sell Added & WhatsApp Sent'),
                           ),
                         );
                         Navigator.pop(context);
@@ -187,10 +236,10 @@ We appreciate your business and look forward to serving you again!
                               ]
                               : [],
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
-                        _hovering ? 'Save' : 'Save',
-                        style: const TextStyle(
+                        'Save',
+                        style: TextStyle(
                           fontSize: 16,
                           color: Colors.white,
                           fontFamily: 'Poppins',

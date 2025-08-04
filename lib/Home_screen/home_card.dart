@@ -57,19 +57,21 @@ class _HomeCardState extends State<HomeCard>
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double iconSize = screenWidth * 0.09; // Responsive icon
+    double fontSize = screenWidth * 0.045;
+
     Widget animatedIcon;
 
     if (widget.icon == Icons.bar_chart) {
-      animatedIcon = BarChartAnimationIcon(
-        color: widget.iconColor,
-      ); // custom bars
+      animatedIcon = BarChartAnimationIcon(color: widget.iconColor);
     } else if (shouldScale) {
       animatedIcon = ScaleTransition(
         scale: _scaleAnimation,
-        child: Icon(widget.icon, size: 40, color: widget.iconColor),
+        child: Icon(widget.icon, size: iconSize, color: widget.iconColor),
       );
     } else {
-      animatedIcon = Icon(widget.icon, size: 40, color: widget.iconColor);
+      animatedIcon = Icon(widget.icon, size: iconSize, color: widget.iconColor);
     }
 
     return GestureDetector(
@@ -80,10 +82,13 @@ class _HomeCardState extends State<HomeCard>
           ),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(30),
+        padding: EdgeInsets.symmetric(
+          vertical: screenWidth * 0.08,
+          horizontal: screenWidth * 0.05,
+        ),
         decoration: BoxDecoration(
           color: widget.cardColor,
-          borderRadius: BorderRadius.circular(0),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
@@ -96,12 +101,14 @@ class _HomeCardState extends State<HomeCard>
           children: [
             animatedIcon,
             const SizedBox(width: 16),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 16,
-                color: widget.textColor,
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  color: widget.textColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

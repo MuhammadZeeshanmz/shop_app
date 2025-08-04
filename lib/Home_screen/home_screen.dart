@@ -31,22 +31,50 @@ class HomeScreen extends StatelessWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Logout', style: TextStyle(color: Color(0xFF212121))),
-            content: Text('Do you want to logout or delete your account?'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            title: Row(
+              children: const [
+                Icon(Icons.logout, color: Colors.redAccent),
+                SizedBox(width: 10),
+                Text(
+                  'Logout / Delete',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF212121),
+                  ),
+                ),
+              ],
+            ),
+            content: const Text(
+              'Would you like to logout or permanently delete your account?',
+              style: TextStyle(fontSize: 16),
+            ),
             actions: [
-              TextButton(
+              TextButton.icon(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text('Cancel'),
+                icon: const Icon(Icons.cancel, color: Colors.grey),
+                label: const Text('Cancel'),
               ),
-              TextButton(
+              TextButton.icon(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: Text('Logout'),
+                icon: const Icon(Icons.logout, color: Colors.green),
+                label: const Text('Logout'),
               ),
-              TextButton(
+              TextButton.icon(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text(
-                  'Delete Account',
-                  style: TextStyle(color: Color(0xFFF44336)),
+                icon: const Icon(Icons.delete_forever, color: Colors.red),
+                label: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
                 ),
               ),
             ],
@@ -75,8 +103,10 @@ class HomeScreen extends StatelessWidget {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Failed to delete account. Try logging in again."),
-            backgroundColor: Color(0xFFF44336),
+            content: const Text(
+              "Failed to delete account. Try logging in again.",
+            ),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -108,48 +138,55 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            HomeCard(
-              title: 'Add Purchase',
-              icon: Icons.add_shopping_cart,
-              route: AddPurchaseScreen(),
-              cardColor: Colors.white,
-              textColor: Color(0xFF212121),
-              iconColor: Color(0xFF4CAF50),
-              // animate: true,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double cardSpacing = constraints.maxHeight * 0.02;
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  HomeCard(
+                    title: 'Add Purchase',
+                    icon: Icons.add_shopping_cart,
+                    route: AddPurchaseScreen(),
+                    cardColor: Colors.white,
+                    textColor: Color(0xFF212121),
+                    iconColor: Color(0xFF4CAF50),
+                  ),
+                  SizedBox(height: cardSpacing),
+                  HomeCard(
+                    title: 'Add Sell',
+                    icon: Icons.payment,
+                    route: AddSellScreen(),
+                    cardColor: Colors.white,
+                    textColor: Color(0xFF212121),
+                    iconColor: Color(0xFF4CAF50),
+                  ),
+                  SizedBox(height: cardSpacing),
+                  HomeCard(
+                    title: 'View Khata',
+                    icon: Icons.receipt_long,
+                    route: KhataListScreen(),
+                    cardColor: Colors.white,
+                    textColor: Color(0xFF212121),
+                    iconColor: Color(0xFF4CAF50),
+                  ),
+                  SizedBox(height: cardSpacing),
+                  HomeCard(
+                    title: 'Shop Summary',
+                    icon: Icons.bar_chart,
+                    route: ShopKhataScreen(customers: customersList),
+                    cardColor: Colors.white,
+                    textColor: Color(0xFF212121),
+                    iconColor: Color(0xFF4CAF50),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 16),
-            HomeCard(
-              title: 'Add Sell',
-              icon: Icons.payment,
-              route: AddSellScreen(),
-              cardColor: Colors.white,
-              textColor: Color(0xFF212121),
-              iconColor: Color(0xFF4CAF50),
-            ),
-            SizedBox(height: 16),
-            HomeCard(
-              title: 'View Khata',
-              icon: Icons.receipt_long,
-              route: KhataListScreen(),
-              cardColor: Colors.white,
-              textColor: Color(0xFF212121),
-              iconColor: Color(0xFF4CAF50),
-            ),
-            SizedBox(height: 16),
-            HomeCard(
-              title: 'Shop Summary',
-              icon: Icons.bar_chart,
-              route: ShopKhataScreen(customers: customersList),
-              cardColor: Colors.white,
-              textColor: Color(0xFF212121),
-              iconColor: Color(0xFF4CAF50),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

@@ -14,31 +14,39 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final numberController = TextEditingController();
-  final amountController = TextEditingController();
+  final amountController = TextEditingController(); // Total
+  final paidAmountController = TextEditingController(); // Paid
+
   final _customerService = CustomerService();
 
   bool _hovering = false;
   bool _pressed = false;
-
-  Future<void> sendWhatsAppMessage(String phoneNumber, String message) async {
-    final url =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
-    final uri = Uri.parse(url);
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint('❌ Could not launch: $url');
-      throw Exception('Could not launch WhatsApp');
-    }
-  }
 
   @override
   void dispose() {
     nameController.dispose();
     numberController.dispose();
     amountController.dispose();
+    paidAmountController.dispose();
     super.dispose();
+  }
+
+  String _calculateRemaining() {
+    final total = int.tryParse(amountController.text) ?? 0;
+    final paid = int.tryParse(paidAmountController.text) ?? 0;
+    final remaining = total - paid;
+    return remaining >= 0 ? remaining.toString() : '0';
+  }
+
+  Future<void> sendWhatsAppMessage(String phoneNumber, String message) async {
+    final url =
+        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw Exception('Could not launch WhatsApp');
+    }
   }
 
   @override
@@ -70,7 +78,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
               buildTextField(
                 controller: nameController,
                 label: 'Customer Name',
-                hint: 'Enter your name',
+                hint: 'Enter customer name',
                 icon: Icons.person,
                 textCapitalization: TextCapitalization.words,
                 validator:
@@ -80,7 +88,7 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
               buildTextField(
                 controller: numberController,
                 label: 'Phone Number',
-                hint: 'Enter your phone number',
+                hint: 'Enter phone number',
                 icon: Icons.phone,
                 keyboardType: TextInputType.phone,
                 maxLength: 11,
@@ -96,9 +104,9 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
               const SizedBox(height: 10),
               buildTextField(
                 controller: amountController,
-                label: 'Purchase Amount',
-                hint: 'Enter purchase amount',
-                icon: Icons.shopping_cart,
+                label: 'Total Amount',
+                hint: 'Enter total amount',
+                icon: Icons.attach_money,
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Enter amount';
@@ -108,9 +116,29 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
+              buildTextField(
+                controller: paidAmountController,
+                label: 'Paid Amount',
+                hint: 'Enter amount paid',
+                icon: Icons.payment,
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty)
+                    return 'Enter paid amount';
+                  final total = int.tryParse(amountController.text) ?? 0;
+                  final paid = int.tryParse(value) ?? -1;
+                  if (paid < 0) return 'Enter valid amount';
+                  if (paid > total) return 'Paid cannot exceed total';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              /// Remaining Amount Display
               const SizedBox(height: 20),
 
-              // Custom Save Button
+              /// Save Button
               MouseRegion(
                 onEnter: (_) => setState(() => _hovering = true),
                 onExit: (_) => setState(() => _hovering = false),
@@ -122,9 +150,21 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
                     if (_formKey.currentState!.validate()) {
                       final name = nameController.text.trim();
                       final number = numberController.text.trim();
-                      final amount = int.parse(amountController.text.trim());
+                      final totalAmount = int.parse(
+                        amountController.text.trim(),
+                      );
+                      final paidAmount = int.parse(
+                        paidAmountController.text.trim(),
+                      );
+                      final remainingAmount = totalAmount - paidAmount;
 
-                      customerManager.addPurchase(name, number, amount);
+                      /// ✨ Call new method with partial payment
+                      customerManager.addPurchaseWithPartialPayment(
+                        name,
+                        number,
+                        totalAmount,
+                        paidAmount,
+                      );
 
                       final updatedCustomer = customerManager.customers
                           .firstWhere((c) => c.number == number);
@@ -139,11 +179,11 @@ class _AddPurchaseScreenState extends State<AddPurchaseScreen> {
 
 Dear $name,
 
-Thank you for your payment of *Rs. $amount*.
+🧾 Purchase: Rs. $totalAmount
+✅ Paid: Rs. $paidAmount
+⏳ Remaining: Rs. $remainingAmount
 
-🧾 Your purchase has been recorded successfully.
-
-We appreciate your business and look forward to serving you again!
+Thank you for your purchase.
 
 📍 Battal Bazar
 ''';
@@ -220,6 +260,7 @@ We appreciate your business and look forward to serving you again!
   }) {
     return TextFormField(
       controller: controller,
+      onChanged: (_) => setState(() {}), // Update remaining amount live
       keyboardType: keyboardType,
       maxLength: maxLength,
       textCapitalization: textCapitalization,
@@ -227,16 +268,7 @@ We appreciate your business and look forward to serving you again!
         labelText: label,
         hintText: hint,
         prefixIcon: Icon(icon, color: Colors.indigo),
-        labelStyle: TextStyle(color: Colors.grey[700], fontSize: 16),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: const BorderSide(color: Colors.indigo, width: 2.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
         filled: true,
         fillColor: Colors.grey[100],
         contentPadding: const EdgeInsets.symmetric(
